@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "131874061369",
+    "project_id": "digital-vault-7ef77",
+    "storage_bucket": "digital-vault-7ef77.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:131874061369:android:0136a1d2a7cd41256fa1e8",
+        "android_client_info": {
+          "package_name": "com.example.digital_vault"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmAxxqvGyHG3GyGzapY1WcgDKNuiNa06c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
