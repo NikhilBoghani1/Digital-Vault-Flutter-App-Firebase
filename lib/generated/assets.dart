@@ -10,12 +10,19 @@ class Assets {
   static const String fontsRobotoLight = 'assets/fonts/Roboto-Light.ttf';
   static const String fontsRobotoMedium = 'assets/fonts/Roboto-Medium.ttf';
   static const String fontsRobotoRegular = 'assets/fonts/Roboto-Regular.ttf';
+  static const String imagesAccount = 'assets/images/account.png';
   static const String imagesAdd = 'assets/images/add.png';
   static const String imagesAppleLogo = 'assets/images/apple-logo.png';
+  static const String imagesBank = 'assets/images/bank.png';
+  static const String imagesBell = 'assets/images/bell.png';
+  static const String imagesCreditCard = 'assets/images/credit-card.png';
   static const String imagesGoogle = 'assets/images/google.png';
   static const String imagesHome = 'assets/images/home.png';
   static const String imagesLogo = 'assets/images/logo.png';
   static const String imagesPaper = 'assets/images/paper.png';
   static const String imagesPeople = 'assets/images/people.png';
+  static const String imagesProfile = 'assets/images/profile.jpg';
+  static const String imagesSearch = 'assets/images/search.png';
+  static const String imagesUserProfile = 'assets/images/user_profile.png';
 
 }

@@ -1,7 +1,10 @@
+import 'package:digital_vault/const/constants.dart';
 import 'package:digital_vault/model/bank_account.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 
 class BankAccountScreen extends StatefulWidget {
   @override
@@ -19,7 +22,8 @@ class _BankAccountScreenState extends State<BankAccountScreen> {
 
     if (user != null) {
       // Reference to the user's document in the 'users' collection
-      DocumentReference userDocRef = _firestore.collection('users').doc(user.uid);
+      DocumentReference userDocRef =
+          _firestore.collection('users').doc(user.uid);
 
       // Add bank account to the user's 'bankAccounts' sub-collection
       await userDocRef.collection('bankAccounts').add({
@@ -43,37 +47,124 @@ class _BankAccountScreenState extends State<BankAccountScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    accountNumberController.addListener(_formatAccountNumber);
+  }
+
+  void _formatAccountNumber() {
+    // Get current input without spaces
+    String currentText = accountNumberController.text.replaceAll(' ', '');
+
+    // Format the input by adding space every 4 digits
+    StringBuffer formattedText = StringBuffer();
+    for (int i = 0; i < currentText.length; i++) {
+      if (i > 0 && i % 4 == 0) {
+        formattedText.write(' '); // Add space
+      }
+      formattedText.write(currentText[i]);
+    }
+
+    // Update the controller with the new formatted text
+    // It's important to check if the text has changed to avoid infinite loops
+    if (formattedText.toString() != accountNumberController.text) {
+      accountNumberController.value = TextEditingValue(
+        text: formattedText.toString(),
+        selection: TextSelection.fromPosition(
+          TextPosition(offset: formattedText.length),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    accountNumberController.removeListener(_formatAccountNumber);
+    accountNumberController.dispose();
+    super.dispose();
+  }
+
+  Constants myConstants = Constants();
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Add Bank Account')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Bank Name',
+              style: TextStyle(
+                fontFamily: myConstants.RobotoR,
+                fontSize: 17,
+                color: CupertinoColors.black.withOpacity(0.7),
+              ),
+            ),
+          ),
+          SizedBox(height: 8),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 30),
+            child: TextField(
               controller: bankNameController,
-              decoration: InputDecoration(labelText: 'Bank Name'),
+              decoration: InputDecoration(
+                hintText: 'Bank Name',
+                hintStyle: TextStyle(
+                  fontFamily: myConstants.RobotoL,
+                ),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(11)),
+              ),
             ),
-            SizedBox(height: 20),
-            TextField(
+          ),
+          SizedBox(height: 20),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Account Number',
+              style: TextStyle(
+                fontFamily: myConstants.RobotoR,
+                fontSize: 17,
+                color: CupertinoColors.black.withOpacity(0.7),
+              ),
+            ),
+          ),
+          SizedBox(height: 8),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 30),
+            child: TextField(
               controller: accountNumberController,
-              decoration: InputDecoration(labelText: 'Account Number'),
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly, // Allow only digits
+              ],
+              decoration: InputDecoration(
+                hintText: 'Account Number',
+                hintStyle: TextStyle(
+                  fontFamily: myConstants.RobotoL,
+                ),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(11)),
+              ),
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
+          ),
+          SizedBox(height: 20),
+          Center(
+            child: ElevatedButton(
               onPressed: _addBankAccount,
               child: Text('Add Bank Account'),
             ),
-            SizedBox(height: 20),
-            Expanded(child: BankAccountList()), // Show the bank accounts
-          ],
-        ),
+          ),
+          SizedBox(height: 20),
+          Expanded(child: BankAccountList()), // Show the bank accounts
+        ],
       ),
     );
   }
 }
-
 
 class BankAccountList extends StatelessWidget {
   @override
@@ -113,7 +204,8 @@ class BankAccountList extends StatelessWidget {
                     ),
                     IconButton(
                       icon: Icon(Icons.delete),
-                      onPressed: () => _showDeleteConfirmation(context, account.id),
+                      onPressed: () =>
+                          _showDeleteConfirmation(context, account.id),
                     ),
                   ],
                 ),
@@ -132,7 +224,8 @@ class BankAccountList extends StatelessWidget {
 
   void _showUpdateDialog(BuildContext context, BankAccount account) {
     final bankNameController = TextEditingController(text: account.bankName);
-    final accountNumberController = TextEditingController(text: account.accountNumber);
+    final accountNumberController =
+        TextEditingController(text: account.accountNumber);
 
     showDialog(
       context: context,
@@ -148,14 +241,20 @@ class BankAccountList extends StatelessWidget {
               ),
               TextField(
                 controller: accountNumberController,
-                decoration: InputDecoration(labelText: 'Account Number'),
+                decoration: InputDecoration(
+                  labelText: 'Account Number',
+                  suffixIcon: accountNumberController.text.length == 17
+                      ? Icon(Icons.check, color: Colors.green)
+                      : Icon(Icons.check, color: Colors.red),
+                ),
               ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () {
-                _updateBankAccount(account.id, bankNameController.text, accountNumberController.text);
+                _updateBankAccount(account.id, bankNameController.text,
+                    accountNumberController.text);
                 Navigator.of(context).pop();
               },
               child: Text('Update'),
@@ -172,7 +271,8 @@ class BankAccountList extends StatelessWidget {
 
   void _updateBankAccount(String id, String bankName, String accountNumber) {
     final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    _firestore.collection('users')
+    _firestore
+        .collection('users')
         .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection('bankAccounts')
         .doc(id)
@@ -213,11 +313,13 @@ class BankAccountList extends StatelessWidget {
 
   void _deleteBankAccount(String id) {
     final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    _firestore.collection('users')
+    _firestore
+        .collection('users')
         .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection('bankAccounts')
         .doc(id)
-        .delete().then((_) {
+        .delete()
+        .then((_) {
       // Optionally show a success message
     }).catchError((error) {
       // Handle error

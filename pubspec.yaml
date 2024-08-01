@@ -39,6 +39,8 @@ dependencies:
   firebase_core:
   get:
   cloud_firestore:
+  local_auth:
+  shimmer:
 
 dev_dependencies:
   flutter_test:
