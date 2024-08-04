@@ -1,5 +1,7 @@
 import 'package:digital_vault/const/constants.dart';
 import 'package:digital_vault/screen/add_bank_details/bank_account_screen.dart';
+import 'package:digital_vault/screen/credit_card/credit_card_screen.dart';
+import 'package:digital_vault/screen/debit_card/debit_card_screen.dart';
 import 'package:digital_vault/screen/home/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -106,24 +108,32 @@ class _NavigationBarViewState extends State<NavigationBarView> {
                     Container(
                       child: Column(
                         children: <Widget>[
-                          Container(
-                            decoration: BoxDecoration(
-                              color:
-                                  CupertinoColors.activeBlue.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(100),
-                            ),
-                            padding: EdgeInsets.all(20),
-                            child: Image(
-                              width: 35,
-                              height: 35,
-                              image: AssetImage(
-                                "assets/images/credit-card.png",
+                          GestureDetector(
+                            onTap: () {
+                              Get.off(CreditCardScreen(),
+                                  duration: Duration(milliseconds: 500),
+                                  transition: Transition.downToUp);
+                              print('Add Bank Details');
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color:
+                                    CupertinoColors.activeBlue.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              padding: EdgeInsets.all(20),
+                              child: Image(
+                                width: 35,
+                                height: 35,
+                                image: AssetImage(
+                                  "assets/images/creadit.png",
+                                ),
                               ),
                             ),
                           ),
                           SizedBox(height: 5),
                           Text(
-                            "Card",
+                            "Creadit Card",
                             style: TextStyle(
                               fontFamily: myConstants.RobotoR,
                             ),
@@ -134,24 +144,32 @@ class _NavigationBarViewState extends State<NavigationBarView> {
                     Container(
                       child: Column(
                         children: <Widget>[
-                          Container(
-                            decoration: BoxDecoration(
-                              color:
-                                  CupertinoColors.activeGreen.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(100),
-                            ),
-                            padding: EdgeInsets.all(20),
-                            child: Image(
-                              width: 35,
-                              height: 35,
-                              image: AssetImage(
-                                "assets/images/search.png",
+                          GestureDetector(
+                            onTap: () {
+                              Get.off(DebitCardScreen(),
+                                  duration: Duration(milliseconds: 500),
+                                  transition: Transition.downToUp);
+                              print('Add Bank Details');
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: CupertinoColors.activeGreen
+                                    .withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              padding: EdgeInsets.all(20),
+                              child: Image(
+                                width: 35,
+                                height: 35,
+                                image: AssetImage(
+                                  "assets/images/debit.png",
+                                ),
                               ),
                             ),
                           ),
                           SizedBox(height: 5),
                           Text(
-                            "Verify",
+                            "Debit Card",
                             style: TextStyle(
                               fontFamily: myConstants.RobotoR,
                             ),

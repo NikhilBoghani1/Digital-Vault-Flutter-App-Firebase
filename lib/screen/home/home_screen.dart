@@ -1,8 +1,10 @@
 import 'package:digital_vault/const/constants.dart';
+import 'package:digital_vault/screen/view_credit_card/view_credit_card_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -11,6 +13,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+  }
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -27,6 +34,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _fetchUserName();
+    _fetchBankAccounts();
+    _fetchcreditCard();
+    /*_fetchDebitCard();*/
+    _setupDebitCardListener();
   }
 
   Future<void> _fetchUserName() async {
@@ -53,50 +64,125 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  //------------------------------------------------
-  bool _notificationsEnabled = false;
+  List<Map<String, dynamic>> _bankAccounts = [];
 
-  void _showNotificationDialog(BuildContext context) {
-    showCupertinoDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return CupertinoAlertDialog(
-          title: Text("Notification Settings"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Enable notifications?"),
-              SizedBox(height: 10),
-              CupertinoSwitch(
-                value: _notificationsEnabled,
-                onChanged: (bool value) {
-                  setState(() {
-                    _notificationsEnabled =
-                        value; // Update the notification state
-                  });
-                },
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            CupertinoDialogAction(
-              child: Text("Cancel"),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-            CupertinoDialogAction(
-              child: Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                // You can add more functionality here for the OK action if needed
-              },
-            ),
-          ],
-        );
-      },
-    );
+  // Method to fetch bank account data from Firestore
+  Future<void> _fetchBankAccounts() async {
+    _firestore
+        .collection('users')
+        .doc(_auth.currentUser?.uid)
+        .collection('bankAccounts')
+        .snapshots() // Use snapshots for real-time updates
+        .listen((snapshot) {
+      List<Map<String, dynamic>> bankAccountList = [];
+
+      // Populate the list with the current documents
+      for (var doc in snapshot.docs) {
+        bankAccountList.add(doc.data() as Map<String, dynamic>);
+      }
+
+      // Update the state with the new list of debit cards
+      setState(() {
+        _bankAccounts = bankAccountList; // Update variable with new data
+      });
+
+      // Print the count of debit cards fetched
+      print("Number of debit cards: ${_bankAccounts.length}");
+    }, onError: (e) {
+      print("Error listening for debit card updates: $e");
+    });
   }
+
+  // Method to fetch Credit Card data from Firestore
+
+  List<Map<String, dynamic>> _creditCard = [];
+
+  Future<void> _fetchcreditCard() async {
+    // Listen for changes in the debitDetails collection
+    _firestore
+        .collection('users')
+        .doc(_auth.currentUser?.uid)
+        .collection('credit_cards')
+        .snapshots() // Use snapshots for real-time updates
+        .listen((snapshot) {
+      List<Map<String, dynamic>> credidCardList = [];
+
+      // Populate the list with the current documents
+      for (var doc in snapshot.docs) {
+        credidCardList.add(doc.data() as Map<String, dynamic>);
+      }
+
+      // Update the state with the new list of debit cards
+      setState(() {
+        _creditCard = credidCardList; // Update variable with new data
+      });
+
+      // Print the count of debit cards fetched
+      print("Number of debit cards: ${_creditCard.length}");
+    }, onError: (e) {
+      print("Error listening for debit card updates: $e");
+    });
+  }
+
+  // Method to fetch Credit Card data from Firestore
+
+  List<Map<String, dynamic>> _debitCard = [];
+
+  void _setupDebitCardListener() {
+    // Listen for changes in the debitDetails collection
+    _firestore
+        .collection('users')
+        .doc(_auth.currentUser?.uid)
+        .collection('debit_cards')
+        .snapshots() // Use snapshots for real-time updates
+        .listen((snapshot) {
+      List<Map<String, dynamic>> debitCardList = [];
+
+      // Populate the list with the current documents
+      for (var doc in snapshot.docs) {
+        debitCardList.add(doc.data() as Map<String, dynamic>);
+      }
+
+      // Update the state with the new list of debit cards
+      setState(() {
+        _debitCard = debitCardList; // Update variable with new data
+      });
+
+      // Print the count of debit cards fetched
+      print("Number of debit cards: ${_debitCard.length}");
+    }, onError: (e) {
+      print("Error listening for debit card updates: $e");
+    });
+  }
+
+/*  Future<void> _fetchDebitCard() async {
+    try {
+      // Fetch the debit card details for the logged-in user
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(_auth.currentUser?.uid)
+          .collection('debitDetails')
+          .get();
+
+      // Create a list to hold the debit card details
+      List<Map<String, dynamic>> debitCardList = [];
+
+      // Iterate through the documents and add them to the list
+      for (var doc in snapshot.docs) {
+        debitCardList.add(doc.data() as Map<String, dynamic>);
+      }
+
+      // Update the state with the fetched debit card details
+      setState(() {
+        _debitCard = debitCardList; // Update variable with new data
+      });
+
+      // Print the count of debit cards fetched
+      print("Number of debit cards: ${_debitCard.length}");
+    } catch (e) {
+      print("Error fetching debit card details: $e");
+    }
+  }*/
 
   Constants myConstants = Constants();
 
@@ -106,107 +192,335 @@ class _HomeScreenState extends State<HomeScreen> {
     Constants myConstants = Constants();
 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text(email.isNotEmpty ? "Hey, $email" : "Loading..."),
-      //   actions: [
-      //     IconButton(
-      //       icon: Icon(Icons.logout),
-      //       onPressed: () async {
-      //         await _auth.signOut();
-      //         Navigator.of(context).pushReplacement(
-      //           MaterialPageRoute(
-      //             builder: (_) => LoginRegisterScreen(),
-      //           ),
-      //         );
-      //       },
-      //     ),
-      //   ],
-      // ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            children: <Widget>[
-              SizedBox(height: 60),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 28),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Row(
+      body: Center(
+        child: Column(
+          children: <Widget>[
+            Container(
+              height: 360,
+              child: Stack(
+                children: [
+                  Container(
+                    width: 400,
+                    height: 210,
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.activeBlue.withOpacity(0.2),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(30),
+                        bottomRight: Radius.circular(30),
+                      ),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 30),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        Container(
-                          child: Image.asset(
-                            width: 46,
-                            height: 46,
-                            "assets/images/user_profile.png",
-                          ),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(100),
-                            color: CupertinoColors.systemRed.withOpacity(0.2),
+                        Text(
+                          "Wel come, $name",
+                          style: TextStyle(
+                            fontFamily: myConstants.RobotoR,
+                            fontSize: 20,
                           ),
                         ),
-                        SizedBox(width: 15),
-                        Column(
+                        Icon(Icons.fingerprint_rounded),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                    top: 160,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        width: 350,
+                        height: 190,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: CupertinoColors.systemBlue,
+                        ),
+                        padding: EdgeInsets.only(left: 20, top: 15, right: 20),
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                CircleAvatar(
+                                  radius: 25,
+                                  backgroundColor:
+                                      Colors.white.withOpacity(0.5),
+                                  child: Icon(CupertinoIcons.umbrella),
+                                ),
+                                Icon(
+                                  CupertinoIcons.creditcard,
+                                  color: Colors.white,
+                                )
+                              ],
+                            ),
+                            SizedBox(height: 10),
                             Text(
-                              "Hi, $name",
+                              "$name",
                               style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
                                 fontFamily: myConstants.RobotoR,
-                                fontSize: 16,
-                                color: CupertinoColors.inactiveGray,
                               ),
                             ),
-                            SizedBox(height: 2),
+                            SizedBox(height: 10),
                             Text(
-                              "Good Morning",
+                              "$email",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontFamily: myConstants.RobotoR,
+                              ),
+                            ),
+                            SizedBox(height: 25),
+                            Text(
+                              "****  ****  ****  1004",
                               style: TextStyle(
                                 fontFamily: myConstants.RobotoR,
-                                fontSize: 20,
+                                color: Colors.white,
+                                fontSize: 17,
                               ),
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                    SizedBox(width: 12),
-                    Container(
-                      width: 45,
-                      height: 45,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.grey,
-                        ),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: IconButton(
-                        onPressed: () => _showNotificationDialog(context),
-                        icon: Image.asset(
-                          color: Colors.black,
-                          width: 22,
-                          height: 22,
-                          "assets/images/bell.png",
-                        ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 25),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 28),
-                width: 350,
-                height: 160,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: Colors.grey,
                   ),
-                ),
-                child: _buildBankAccountList(),
+                ],
               ),
-            ],
-          ),
+            ),
+            SizedBox(height: 20),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 18),
+                        width: 270,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          color: CupertinoColors.systemYellow.withOpacity(0.4),
+                        ),
+                        child: Text(
+                          "Totle Bank Account",
+                          style: TextStyle(
+                            fontFamily: myConstants.RobotoM,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          color: CupertinoColors.systemYellow.withOpacity(0.5),
+                        ),
+                        child: Text(
+                          "${_bankAccounts.length}",
+                          style: TextStyle(
+                            fontFamily: myConstants.PoppinsSB,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 18),
+                          width: 270,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            color: CupertinoColors.activeBlue.withOpacity(0.4),
+                          ),
+                          child: Text(
+                            "Totle Credit Card",
+                            style: TextStyle(
+                              fontFamily: myConstants.RobotoM,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          color: CupertinoColors.activeBlue.withOpacity(0.5),
+                        ),
+                        child: Text(
+                          "${_creditCard.length}",
+                          style: TextStyle(
+                            fontFamily: myConstants.PoppinsSB,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 18),
+                        width: 270,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          color: CupertinoColors.activeGreen.withOpacity(0.4),
+                        ),
+                        child: Text(
+                          "Totle Debit Card",
+                          style: TextStyle(
+                            fontFamily: myConstants.RobotoM,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          color: CupertinoColors.activeGreen.withOpacity(0.5),
+                        ),
+                        child: Text(
+                          "${_debitCard.length}",
+                          style: TextStyle(
+                            fontFamily: myConstants.PoppinsSB,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Container(
+                    height: 190,
+                    width: 300,
+                    child: StreamBuilder(
+                      stream: _firestore
+                          .collection('users')
+                          .doc(_auth.currentUser?.uid)
+                          .collection("debit_cards")
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return CircularProgressIndicator();
+                        }
+                        if (snapshot.data!.docs.isEmpty) {
+                          return Text("No bank accounts found.");
+                        }
+                        int bankAccountCount = snapshot.data!.docs.length;
+                        // Get the first bank account document
+                      /*  final data = snapshot.data!.docs.first.data()
+                            as Map<String, dynamic>;*/
+                        return ListView.builder(
+                          itemCount: snapshot.data!.docs.length,
+                          // itemCount: 1,
+                          itemBuilder: (context, index) {
+                            DocumentSnapshot doc = snapshot.data!.docs[index];
+                            return Container(
+                              margin: EdgeInsets.only(top: 10),
+                              width: 350,
+                              height: 160,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: CupertinoColors.black,
+                                ),
+                                color: snapshot.data!.docs[index]
+                                            ['Card Type'] ==
+                                        'Visa'
+                                    ? Colors.blue.withOpacity(0.2)
+                                    : snapshot.data!.docs[index]['Card Type'] ==
+                                            'MasterCard'
+                                        ? Colors.yellow.withOpacity(0.2)
+                                        : Colors.grey.withOpacity(0.2),
+                                // Default color (you can choose any other color)
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 20, top: 20, right: 20),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          "${snapshot.data!.docs[index]['Card Holder Name']}",
+                                          style: TextStyle(
+                                            fontFamily: myConstants.RobotoR,
+                                            fontSize: 19,
+                                          ),
+                                        ),
+                                        Text(
+                                          "${snapshot.data!.docs[index]['Card Type']}",
+                                          style: TextStyle(
+                                            fontFamily: myConstants.RobotoR,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 70),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 20, right: 30),
+                                    child: Row(
+                                      children: <Widget>[
+                                        Text(
+                                          "${snapshot.data!.docs[index]['Card Number']}",
+                                          style: TextStyle(
+                                            fontFamily: myConstants.RobotoR,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                        Text(
+                                          "${snapshot.data!.docs[index]['CVV']}",
+                                          style: TextStyle(
+                                            fontFamily: myConstants.RobotoR,
+                                          ),
+                                        ),
+                                      ],
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -234,7 +548,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (snapshot.data!.docs.isEmpty) {
           return Text("No bank accounts found.");
         }
-
+        int bankAccountCount = snapshot.data!.docs.length;
         // Get the first bank account document
         final data = snapshot.data!.docs.first.data() as Map<String, dynamic>;
 

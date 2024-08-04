@@ -14,26 +14,42 @@ class BankAccountScreen extends StatefulWidget {
 class _BankAccountScreenState extends State<BankAccountScreen> {
   final TextEditingController bankNameController = TextEditingController();
   final TextEditingController accountNumberController = TextEditingController();
+  final TextEditingController accountHoldername = TextEditingController();
+  final TextEditingController IFSCcode = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String? _selectedType;
+  final List<String> _accountType = ['Savings', 'Current', 'Business'];
 
   Future<void> _addBankAccount() async {
     User? user = _auth.currentUser;
 
     if (user != null) {
+      // Create a BankAccount instance
+      BankAccount newAccount = BankAccount(
+        accountHolderName: accountHoldername.text.trim(),
+        bankName: bankNameController.text.trim(),
+        accountNumber: accountNumberController.text.trim(),
+        IFSCCode: IFSCcode.text.trim(),
+        accountType: _selectedType ?? '', // Safely handle null selection
+      );
+
       // Reference to the user's document in the 'users' collection
       DocumentReference userDocRef =
           _firestore.collection('users').doc(user.uid);
 
-      // Add bank account to the user's 'bankAccounts' sub-collection
-      await userDocRef.collection('bankAccounts').add({
-        'bankName': bankNameController.text.trim(),
-        'accountNumber': accountNumberController.text.trim(),
-      });
+      // Add bank account to the user's 'bankAccounts' sub-collection using the model's toMap method
+      await userDocRef.collection('bankAccounts').add(newAccount.toMap());
 
       // Clear the text fields after adding
       bankNameController.clear();
       accountNumberController.clear();
+      IFSCcode.clear();
+      accountHoldername.clear();
+      setState(() {
+        _selectedType = null; // Reset _selectedType
+      });
 
       // Optionally, show a success message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -45,6 +61,41 @@ class _BankAccountScreenState extends State<BankAccountScreen> {
       );
     }
   }
+
+/*  Future<void> _addBankAccount() async {
+    User? user = _auth.currentUser;
+
+    if (user != null) {
+      // Reference to the user's document in the 'users' collection
+      DocumentReference userDocRef =
+          _firestore.collection('users').doc(user.uid);
+
+      // Add bank account to the user's 'bankAccounts' sub-collection
+      await userDocRef.collection('bankAccounts').add({
+        'Account Holder': accountHoldername.text.trim(),
+        'bankName': bankNameController.text.trim(),
+        'accountNumber': accountNumberController.text.trim(),
+        'IFSCCode': IFSCcode.text.trim(),
+        'accountType': _selectedType,
+      });
+
+      // Clear the text fields after adding
+      bankNameController.clear();
+      accountNumberController.clear();
+      IFSCcode.clear();
+      accountHoldername.clear();
+      _accountType.clear();
+
+      // Optionally, show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Bank account added successfully')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User not logged in')),
+      );
+    }
+  }*/
 
   @override
   void initState() {
@@ -89,240 +140,204 @@ class _BankAccountScreenState extends State<BankAccountScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Add Bank Account')),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              'Bank Name',
-              style: TextStyle(
-                fontFamily: myConstants.RobotoR,
-                fontSize: 17,
-                color: CupertinoColors.black.withOpacity(0.7),
-              ),
-            ),
-          ),
-          SizedBox(height: 8),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 30),
-            child: TextField(
-              controller: bankNameController,
-              decoration: InputDecoration(
-                hintText: 'Bank Name',
-                hintStyle: TextStyle(
-                  fontFamily: myConstants.RobotoL,
+      // appBar: AppBar(
+      //   title: Text('Add Bank Account'),
+      // ),
+      body: SingleChildScrollView(
+        child: Column(
+          // mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              width: 400,
+              height: 200,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
                 ),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(11)),
+                color: CupertinoColors.systemYellow.withOpacity(0.2),
+              ),
+              child: Row(
+                // crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Icon(CupertinoIcons.left_chevron),
+                      SizedBox(width: 10),
+                      Text(
+                        'Add Bank Account',
+                        style: TextStyle(
+                          fontFamily: myConstants.PoppinsSB,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ),
-          SizedBox(height: 20),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              'Account Number',
-              style: TextStyle(
-                fontFamily: myConstants.RobotoR,
-                fontSize: 17,
-                color: CupertinoColors.black.withOpacity(0.7),
-              ),
-            ),
-          ),
-          SizedBox(height: 8),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 30),
-            child: TextField(
-              controller: accountNumberController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly, // Allow only digits
+            SizedBox(height: 30),
+            Stack(
+              children: [
+                Positioned(
+                  child: Center(
+                    child: Image(
+                      width: 100,
+                      height: 100,
+                      image: AssetImage(
+                        "assets/images/bank.png",
+                      ),
+                    ),
+                  ),
+                ),
               ],
-              decoration: InputDecoration(
-                hintText: 'Account Number',
-                hintStyle: TextStyle(
-                  fontFamily: myConstants.RobotoL,
+            ),
+            SizedBox(height: 30),
+            // Padding(
+            //   padding: EdgeInsets.symmetric(horizontal: 32),
+            //   child: Text(
+            //     'Bank Name',
+            //     style: TextStyle(
+            //       fontFamily: myConstants.RobotoR,
+            //       fontSize: 17,
+            //       color: CupertinoColors.black.withOpacity(0.7),
+            //     ),
+            //   ),
+            // ),
+            // SizedBox(height: 8),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 30),
+              child: TextField(
+                controller: bankNameController,
+                decoration: InputDecoration(
+                  hintText: 'Bank Name',
+                  hintStyle: TextStyle(
+                    fontFamily: myConstants.RobotoL,
+                  ),
+                  border: UnderlineInputBorder(
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(11)),
               ),
             ),
-          ),
-          SizedBox(height: 20),
-          Center(
-            child: ElevatedButton(
-              onPressed: _addBankAccount,
-              child: Text('Add Bank Account'),
+            SizedBox(height: 20),
+            SizedBox(height: 8),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 30),
+              child: TextField(
+                controller: accountHoldername,
+                decoration: InputDecoration(
+                  hintText: 'Account Holder Name',
+                  hintStyle: TextStyle(
+                    fontFamily: myConstants.RobotoL,
+                  ),
+                  border: UnderlineInputBorder(
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
             ),
-          ),
-          SizedBox(height: 20),
-          Expanded(child: BankAccountList()), // Show the bank accounts
-        ],
+            SizedBox(height: 20),
+            SizedBox(height: 8),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 30),
+              child: TextField(
+                controller: accountNumberController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                ],
+                decoration: InputDecoration(
+                  hintText: 'Account Number',
+                  hintStyle: TextStyle(
+                    fontFamily: myConstants.RobotoL,
+                  ),
+                  border: UnderlineInputBorder(
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            SizedBox(height: 8),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 30),
+              child: TextField(
+                controller: IFSCcode,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly, // Allow only digits
+                ],
+                decoration: InputDecoration(
+                  hintText: 'IFSC Code',
+                  hintStyle: TextStyle(
+                    fontFamily: myConstants.RobotoL,
+                  ),
+                  border: UnderlineInputBorder(
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            SizedBox(height: 8),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 30),
+              child: DropdownButton<String>(
+                hint: Text(
+                  "Account Type",
+                  style: TextStyle(
+                    fontFamily: myConstants.RobotoR,
+                  ),
+                ),
+                value: _selectedType,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedType = newValue;
+                  });
+                },
+                items:
+                    _accountType.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(
+                      value,
+                      style: TextStyle(
+                        fontFamily: myConstants.RobotoL,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            SizedBox(height: 30),
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 55, vertical: 17),
+                  elevation: 10,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: _addBankAccount,
+                child: Text(
+                  'Add Bank Account',
+                  style: TextStyle(
+                    fontFamily: myConstants.RobotoR,
+                    color: Colors.black,
+                    fontSize: 17,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            // Expanded(child: BankAccountList()), // Show the bank accounts
+          ],
+        ),
       ),
     );
-  }
-}
-
-class BankAccountList extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestore
-          .collection('users')
-          .doc(_auth.currentUser?.uid)
-          .collection('bankAccounts')
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No bank accounts found.'));
-        }
-
-        return ListView(
-          children: snapshot.data!.docs.map((doc) {
-            final data = doc.data() as Map<String, dynamic>?;
-            if (data != null) {
-              final account = BankAccount.fromJson(doc.id, data);
-              return ListTile(
-                title: Text('Bank: ${account.bankName}'),
-                subtitle: Text('Account Number: ${account.accountNumber}'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () => _showUpdateDialog(context, account),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () =>
-                          _showDeleteConfirmation(context, account.id),
-                    ),
-                  ],
-                ),
-              );
-            } else {
-              return ListTile(
-                title: Text('Error: No data available'),
-                subtitle: Text('Document ID: ${doc.id}'),
-              );
-            }
-          }).toList(),
-        );
-      },
-    );
-  }
-
-  void _showUpdateDialog(BuildContext context, BankAccount account) {
-    final bankNameController = TextEditingController(text: account.bankName);
-    final accountNumberController =
-        TextEditingController(text: account.accountNumber);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Update Bank Account'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: bankNameController,
-                decoration: InputDecoration(labelText: 'Bank Name'),
-              ),
-              TextField(
-                controller: accountNumberController,
-                decoration: InputDecoration(
-                  labelText: 'Account Number',
-                  suffixIcon: accountNumberController.text.length == 17
-                      ? Icon(Icons.check, color: Colors.green)
-                      : Icon(Icons.check, color: Colors.red),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _updateBankAccount(account.id, bankNameController.text,
-                    accountNumberController.text);
-                Navigator.of(context).pop();
-              },
-              child: Text('Update'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _updateBankAccount(String id, String bankName, String accountNumber) {
-    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    _firestore
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser?.uid)
-        .collection('bankAccounts')
-        .doc(id)
-        .update({
-      'bankName': bankName,
-      'accountNumber': accountNumber,
-    }).then((_) {
-      // Optionally show a success message
-    }).catchError((error) {
-      // Handle error
-    });
-  }
-
-  void _showDeleteConfirmation(BuildContext context, String accountId) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Delete Bank Account'),
-          content: Text('Are you sure you want to delete this bank account?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                _deleteBankAccount(accountId);
-                Navigator.of(context).pop();
-              },
-              child: Text('Delete'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _deleteBankAccount(String id) {
-    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    _firestore
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser?.uid)
-        .collection('bankAccounts')
-        .doc(id)
-        .delete()
-        .then((_) {
-      // Optionally show a success message
-    }).catchError((error) {
-      // Handle error
-    });
   }
 }

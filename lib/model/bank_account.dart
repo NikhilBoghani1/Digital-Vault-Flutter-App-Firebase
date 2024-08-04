@@ -1,51 +1,39 @@
-// class BankAccount {
-//   String id;
-//   String email;
-//   String bankName;
-//   String accountNumber;
-//
-//   BankAccount({
-//     required this.id,
-//     required this.email,
-//     required this.bankName,
-//     required this.accountNumber,
-//   });
-//
-//   factory BankAccount.fromJson(String id, Map<String, dynamic> json) {
-//     return BankAccount(
-//       id: id,
-//       email: json['email'],
-//       bankName: json['bankName'],
-//       accountNumber: json['accountNumber'],
-//     );
-//   }
-//
-//   Map<String, dynamic> toJson() {
-//     return {
-//       'email': email,
-//       'bankName': bankName,
-//       'accountNumber': accountNumber,
-//     };
-//   }
-// }
+// bank_account.dart
 
 class BankAccount {
-  final String id;
-  final String bankName;
-  final String accountNumber;
+  String accountHolderName;
+  String bankName;
+  String accountNumber;
+  String IFSCCode;
+  String accountType;
 
   BankAccount({
-    required this.id,
+    required this.accountHolderName,
     required this.bankName,
     required this.accountNumber,
+    required this.IFSCCode,
+    required this.accountType,
   });
 
-  factory BankAccount.fromJson(String id, Map<String, dynamic> json) {
+  // Convert BankAccount instance to a Map for Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'Account Holder': accountHolderName,
+      'Bank Name': bankName,
+      'Account Number': accountNumber,
+      'IFSC Code': IFSCCode,
+      'Account Type': accountType,
+    };
+  }
+
+  // Create a BankAccount object from a Map
+  factory BankAccount.fromMap(Map<String, dynamic> map) {
     return BankAccount(
-      id: id,
-      bankName: json['bankName'] ?? 'Unknown Bank', // Default value if null
-      accountNumber:
-          json['accountNumber'] ?? 'Unknown Account', // Default value if null
+      accountHolderName: map['Account Holder'],
+      bankName: map['Bank Name'],
+      accountNumber: map['Account Number'],
+      IFSCCode: map['IFSC Code'],
+      accountType: map['Account Type'],
     );
   }
 }

@@ -15,7 +15,9 @@ class Assets {
   static const String imagesAppleLogo = 'assets/images/apple-logo.png';
   static const String imagesBank = 'assets/images/bank.png';
   static const String imagesBell = 'assets/images/bell.png';
+  static const String imagesCreadit = 'assets/images/creadit.png';
   static const String imagesCreditCard = 'assets/images/credit-card.png';
+  static const String imagesDebit = 'assets/images/debit.png';
   static const String imagesGoogle = 'assets/images/google.png';
   static const String imagesHome = 'assets/images/home.png';
   static const String imagesLogo = 'assets/images/logo.png';
