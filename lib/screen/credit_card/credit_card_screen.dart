@@ -110,11 +110,26 @@ class _CreditCardScreenState extends State<CreditCardScreen> {
             .doc(user.uid)
             .collection('credit_cards')
             .add(newCard.toMap());
+
         _showSuccessDialog(); // Show success message
+
+        // Clearing all text fields and resetting dropdown
+        _clearFields();
       } catch (e) {
         _showErrorDialog(e.toString()); // Show error message
       }
     }
+  }
+
+// Method to clear all fields
+  void _clearFields() {
+    cardHolderName.clear();
+    cardNumber.clear();
+    cardCVV.clear();
+    _expiryController.clear();
+    setState(() {
+      _selectedType = null; // Reset dropdown selection
+    });
   }
 
   void _showSuccessDialog() {

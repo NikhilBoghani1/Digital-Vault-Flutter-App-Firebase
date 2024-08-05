@@ -36,7 +36,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchUserName();
     _fetchBankAccounts();
     _fetchcreditCard();
-    /*_fetchDebitCard();*/
     _setupDebitCardListener();
   }
 
@@ -154,35 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
       print("Error listening for debit card updates: $e");
     });
   }
-
-/*  Future<void> _fetchDebitCard() async {
-    try {
-      // Fetch the debit card details for the logged-in user
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(_auth.currentUser?.uid)
-          .collection('debitDetails')
-          .get();
-
-      // Create a list to hold the debit card details
-      List<Map<String, dynamic>> debitCardList = [];
-
-      // Iterate through the documents and add them to the list
-      for (var doc in snapshot.docs) {
-        debitCardList.add(doc.data() as Map<String, dynamic>);
-      }
-
-      // Update the state with the fetched debit card details
-      setState(() {
-        _debitCard = debitCardList; // Update variable with new data
-      });
-
-      // Print the count of debit cards fetched
-      print("Number of debit cards: ${_debitCard.length}");
-    } catch (e) {
-      print("Error fetching debit card details: $e");
-    }
-  }*/
 
   Constants myConstants = Constants();
 
@@ -414,109 +384,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   SizedBox(height: 20),
-                  Container(
-                    height: 190,
-                    width: 300,
-                    child: StreamBuilder(
-                      stream: _firestore
-                          .collection('users')
-                          .doc(_auth.currentUser?.uid)
-                          .collection("debit_cards")
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return CircularProgressIndicator();
-                        }
-                        if (snapshot.data!.docs.isEmpty) {
-                          return Text("No bank accounts found.");
-                        }
-                        int bankAccountCount = snapshot.data!.docs.length;
-                        // Get the first bank account document
-                      /*  final data = snapshot.data!.docs.first.data()
-                            as Map<String, dynamic>;*/
-                        return ListView.builder(
-                          itemCount: snapshot.data!.docs.length,
-                          // itemCount: 1,
-                          itemBuilder: (context, index) {
-                            DocumentSnapshot doc = snapshot.data!.docs[index];
-                            return Container(
-                              margin: EdgeInsets.only(top: 10),
-                              width: 350,
-                              height: 160,
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: CupertinoColors.black,
-                                ),
-                                color: snapshot.data!.docs[index]
-                                            ['Card Type'] ==
-                                        'Visa'
-                                    ? Colors.blue.withOpacity(0.2)
-                                    : snapshot.data!.docs[index]['Card Type'] ==
-                                            'MasterCard'
-                                        ? Colors.yellow.withOpacity(0.2)
-                                        : Colors.grey.withOpacity(0.2),
-                                // Default color (you can choose any other color)
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 20, top: 20, right: 20),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          "${snapshot.data!.docs[index]['Card Holder Name']}",
-                                          style: TextStyle(
-                                            fontFamily: myConstants.RobotoR,
-                                            fontSize: 19,
-                                          ),
-                                        ),
-                                        Text(
-                                          "${snapshot.data!.docs[index]['Card Type']}",
-                                          style: TextStyle(
-                                            fontFamily: myConstants.RobotoR,
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(height: 70),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 20, right: 30),
-                                    child: Row(
-                                      children: <Widget>[
-                                        Text(
-                                          "${snapshot.data!.docs[index]['Card Number']}",
-                                          style: TextStyle(
-                                            fontFamily: myConstants.RobotoR,
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                        Text(
-                                          "${snapshot.data!.docs[index]['CVV']}",
-                                          style: TextStyle(
-                                            fontFamily: myConstants.RobotoR,
-                                          ),
-                                        ),
-                                      ],
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  )
                 ],
               ),
             ),
