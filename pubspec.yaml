@@ -108,4 +108,7 @@ flutter:
     - assets/images/
     - assets/images/google.png
     - assets/images/logo.png
+    - assets/images/visa.png
+    - assets/images/add-user.png
+    - assets/images/logout.png
 

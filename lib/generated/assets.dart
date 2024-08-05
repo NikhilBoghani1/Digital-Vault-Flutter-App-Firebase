@@ -4,6 +4,7 @@ class Assets {
 
   static const String assetsImagesGoogle = 'assets/images/google.png';
   static const String assetsImagesLogo = 'assets/images/logo.png';
+  static const String assetsImagesVisa = 'assets/images/visa.png';
   static const String fontsPlaywriteATItalic = 'assets/fonts/PlaywriteAT-Italic.ttf';
   static const String fontsPoppinsSemiBold = 'assets/fonts/Poppins-SemiBold.ttf';
   static const String fontsRobotoItalic = 'assets/fonts/Roboto-Italic.ttf';
@@ -12,19 +13,23 @@ class Assets {
   static const String fontsRobotoRegular = 'assets/fonts/Roboto-Regular.ttf';
   static const String imagesAccount = 'assets/images/account.png';
   static const String imagesAdd = 'assets/images/add.png';
+  static const String imagesAddUser = 'assets/images/add-user.png';
   static const String imagesAppleLogo = 'assets/images/apple-logo.png';
   static const String imagesBank = 'assets/images/bank.png';
   static const String imagesBell = 'assets/images/bell.png';
+  static const String imagesCard = 'assets/images/card.png';
   static const String imagesCreadit = 'assets/images/creadit.png';
   static const String imagesCreditCard = 'assets/images/credit-card.png';
   static const String imagesDebit = 'assets/images/debit.png';
   static const String imagesGoogle = 'assets/images/google.png';
   static const String imagesHome = 'assets/images/home.png';
   static const String imagesLogo = 'assets/images/logo.png';
+  static const String imagesLogout = 'assets/images/logout.png';
   static const String imagesPaper = 'assets/images/paper.png';
   static const String imagesPeople = 'assets/images/people.png';
   static const String imagesProfile = 'assets/images/profile.jpg';
   static const String imagesSearch = 'assets/images/search.png';
   static const String imagesUserProfile = 'assets/images/user_profile.png';
+  static const String imagesVisa = 'assets/images/visa.png';
 
 }

@@ -3,6 +3,10 @@ import 'package:digital_vault/screen/add_bank_details/bank_account_screen.dart';
 import 'package:digital_vault/screen/credit_card/credit_card_screen.dart';
 import 'package:digital_vault/screen/debit_card/debit_card_screen.dart';
 import 'package:digital_vault/screen/home/home_screen.dart';
+import 'package:digital_vault/screen/login_register/login_register_screen.dart';
+import 'package:digital_vault/screen/profile/profile_screen.dart';
+import 'package:digital_vault/service/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,15 +19,18 @@ class NavigationBarView extends StatefulWidget {
 }
 
 class _NavigationBarViewState extends State<NavigationBarView> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   int _selectedIndex = 0;
 
   // Screens for the navigation
   List<Widget> _screens = [
     HomeScreen(),
+    // ProfileScreen(),
     Center(
       child: Text('Current Screen (Add options shown in bottom sheet here)'),
     ),
-    Center(child: Text('Profile Screen')),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -34,6 +41,15 @@ class _NavigationBarViewState extends State<NavigationBarView> {
       setState(() {
         _selectedIndex = index;
       });
+    }
+  }
+
+  Future<void> signOut() async {
+    try {
+      await _auth.signOut();
+      print("User signed out successfully.");
+    } catch (e) {
+      print("Error signing out: $e");
     }
   }
 
@@ -246,12 +262,128 @@ class _NavigationBarViewState extends State<NavigationBarView> {
     );
   }
 
+  void _showAccountOptions() {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: 190,
+          width: double.infinity,
+          child: Column(
+            children: <Widget>[
+              SizedBox(height: 10),
+              Container(
+                width: 50,
+                height: 5,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  color: CupertinoColors.black,
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                "Account",
+                style: TextStyle(
+                  fontFamily: myConstants.RobotoR,
+                  fontSize: 17,
+                ),
+              ),
+              SizedBox(height: 20),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: <Widget>[
+                    Container(
+                      child: Column(
+                        children: <Widget>[
+                          GestureDetector(
+                            onTap: () async {
+                              signOut();
+                              Get.off(
+                                LoginRegisterScreen(),
+                                duration: Duration(milliseconds: 500),
+                                transition: Transition.downToUp,
+                              );
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: CupertinoColors.systemYellow
+                                    .withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              padding: EdgeInsets.all(20),
+                              child: Image(
+                                width: 33,
+                                height: 33,
+                                image: AssetImage(
+                                  "assets/images/logout.png",
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            "Log out",
+                            style: TextStyle(
+                              fontFamily: myConstants.RobotoR,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      child: Column(
+                        children: <Widget>[
+                          GestureDetector(
+                            /*onTap: () async {
+                              signOut();
+                              Get.off(
+                                LoginRegisterScreen(),
+                                duration: Duration(milliseconds: 500),
+                                transition: Transition.downToUp,
+                              );
+                            },*/
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color:
+                                    CupertinoColors.activeBlue.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(100),
+                              ),
+                              padding: EdgeInsets.all(20),
+                              child: Image(
+                                width: 35,
+                                height: 35,
+                                image: AssetImage(
+                                  "assets/images/add-user.png",
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          Text(
+                            "Add Account",
+                            style: TextStyle(
+                              fontFamily: myConstants.RobotoR,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Constants myConstants = Constants();
 
   @override
   Widget build(BuildContext context) {
-    Constants myConstants = Constants();
-
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: Container(
@@ -292,11 +424,16 @@ class _NavigationBarViewState extends State<NavigationBarView> {
             ),
             BottomNavigationBarItem(
               label: 'Profile',
-              activeIcon: Image.asset(
-                width: 25,
-                height: 23,
-                color: CupertinoColors.systemIndigo,
-                "assets/images/account.png",
+              activeIcon: GestureDetector(
+                onTap: () {
+                  _showAccountOptions();
+                },
+                child: Image.asset(
+                  width: 25,
+                  height: 23,
+                  color: CupertinoColors.systemIndigo,
+                  "assets/images/account.png",
+                ),
               ),
               icon: Image.asset(
                 "assets/images/account.png",
